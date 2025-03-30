@@ -48,31 +48,24 @@ struct VideoRow: View {
             }
 
             // Video info
-            HStack(alignment: .top, spacing: 12) {
-                // Channel icon (placeholder)
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 40, height: 40)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(video.title)
+                    .font(.headline)
+                    .lineLimit(2)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(video.title)
-                        .font(.headline)
-                        .lineLimit(2)
+                HStack(spacing: 4) {
+                    Text(video.author)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
 
-                    HStack(spacing: 4) {
-                        Text(video.author)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-
-                        Text("· \(video.views) views")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    Text("· \(video.views) views")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 16)
         }
-        .padding(.vertical, 8)
+        .padding(.bottom, 16)
     }
 }
 
