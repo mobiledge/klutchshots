@@ -25,7 +25,9 @@
 		C688E3CB2D99CE7300693802 /* Exceptions for "KlutchShots" folder in "KlutchShotsTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				API.swift,
+				DataAccess/RequestDispatcher.swift,
+				DataAccess/VideoAPI.swift,
+				DataAccess/VideoRepository.swift,
 				Fixtures/videos.json,
 				Video.swift,
 			);
