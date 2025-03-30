@@ -29,16 +29,10 @@
 				DataAccess/VideoAPI.swift,
 				DataAccess/VideoRepository.swift,
 				Fixtures/videos.json,
-				Video.swift,
+				Models/Video.swift,
+				Views/VideoListView.swift,
 			);
 			target = C688E3BE2D99CC9700693802 /* KlutchShotsTests */;
-		};
-		C688E3D22D99D61B00693802 /* Exceptions for "KlutchShotsTests" folder in "KlutchShots" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				APITests.swift,
-			);
-			target = C688E3A72D99C3E000693802 /* KlutchShots */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -53,9 +47,6 @@
 		};
 		C688E3C02D99CC9700693802 /* KlutchShotsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C688E3D22D99D61B00693802 /* Exceptions for "KlutchShotsTests" folder in "KlutchShots" target */,
-			);
 			path = KlutchShotsTests;
 			sourceTree = "<group>";
 		};
