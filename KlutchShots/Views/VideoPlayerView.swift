@@ -3,62 +3,59 @@ import AVKit
 import Combine
 
 enum PlayerState: Equatable {
-    case loading // Combines both initial loading and buffering
-    case playing
-    case paused
+    case loading
+    case ready
     case error(String)
 }
 
+@MainActor
 @Observable
-class VideoPlayerViewModel {
+final class VideoPlayerViewModel {
     let player: AVPlayer
     var playerState: PlayerState = .loading
     private var cancellables = Set<AnyCancellable>()
 
     init(videoURL: URL) {
-        player = AVPlayer(url: videoURL)
-        observePlayerStatus()
-        player.play() // Start playing immediately
+        self.player = AVPlayer(url: videoURL)
+        setupObservers()
+        player.play()
     }
 
-    private func observePlayerStatus() {
-        // Combine both time control and item status observations
-        Publishers.CombineLatest(
-            player.publisher(for: \.timeControlStatus),
-            player.publisher(for: \.currentItem?.status)
-        )
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] timeStatus, itemStatus in
-            guard let self else { return }
+    private func setupObservers() {
+        // Handle player item status changes
+        player.publisher(for: \.currentItem?.status)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self else { return }
 
-            // Handle errors first
-            if case .failed = itemStatus,
-               let error = player.currentItem?.error {
-                playerState = .error(error.localizedDescription)
-                return
+                switch status {
+                case .readyToPlay:
+                    playerState = .ready
+                case .failed:
+                    if let error = player.currentItem?.error {
+                        playerState = .error(error.localizedDescription)
+                    }
+                default:
+                    break
+                }
             }
+            .store(in: &cancellables)
 
-            // Handle playback states
-            switch timeStatus {
-            case .paused:
-                playerState = .paused
-            case .playing:
-                playerState = .playing
-            case .waitingToPlayAtSpecifiedRate:
-                playerState = .loading // Use loading state for buffering too
-            @unknown default:
-                break
+        // Handle playback failures
+        NotificationCenter.default.publisher(for: .AVPlayerItemFailedToPlayToEndTime)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                if let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error {
+                    self?.playerState = .error(error.localizedDescription)
+                }
             }
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
     }
 
-    func togglePlayPause() {
-        playerState == .playing ? player.pause() : player.play()
-    }
-
-    var isLoading: Bool {
-        playerState == .loading
+    func cleanup() {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        player.replaceCurrentItem(with: nil)
     }
 }
 
@@ -66,49 +63,44 @@ struct VideoPlayerView: View {
     @State private var viewModel: VideoPlayerViewModel
 
     init(videoURL: URL) {
-        _viewModel = State(initialValue: VideoPlayerViewModel(videoURL: videoURL))
+        _viewModel = State(wrappedValue: VideoPlayerViewModel(videoURL: videoURL))
     }
 
     var body: some View {
-        VStack {
-            ZStack {
-                VideoPlayer(player: viewModel.player)
-                    .frame(height: 300)
+        ZStack {
+            Color.black
+                .aspectRatio(16/9, contentMode: .fit)
 
-                if viewModel.isLoading {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .tint(.white)
+            VideoPlayer(player: viewModel.player)
+                .aspectRatio(16/9, contentMode: .fit)
+                .onAppear {
+                    viewModel.player.play()
                 }
+                .onDisappear {
+                    viewModel.cleanup()
+                }
+
+            if case .loading = viewModel.playerState {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(.white)
             }
 
-            // Controls
-            HStack {
-                Button(action: viewModel.togglePlayPause) {
-                    Image(systemName: viewModel.playerState == .playing ? "pause.fill" : "play.fill")
-                        .font(.title)
-                        .frame(width: 50, height: 50)
+            if case .error(let message) = viewModel.playerState {
+                VStack {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .padding(.bottom, 8)
+                    Text(message)
+                        .multilineTextAlignment(.center)
                 }
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.black.opacity(0.7))
+                .cornerRadius(10)
             }
-            .padding()
-
-            // Status indicator
-            Text(statusDescription)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
-        .padding()
-    }
-
-    private var statusDescription: String {
-        switch viewModel.playerState {
-        case .loading:
-            return viewModel.player.currentItem?.status == .readyToPlay ?
-                "Buffering..." : "Loading video..."
-        case .playing: return "Playing"
-        case .paused: return "Paused"
-        case .error(let message): return "Error: \(message)"
-        }
+        .frame(maxWidth: .infinity)
     }
 }
 
