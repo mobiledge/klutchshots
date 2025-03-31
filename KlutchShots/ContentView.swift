@@ -12,9 +12,10 @@ struct ContentView: View {
     @State var repo = VideoRepository(api: VideoAPI())
 
     var body: some View {
-        NavigationStack {
-            VideoListView(viewModel: VideoListViewModel(repository: repo))
-        }
+        VideoPlayerView(url: URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!)
+//        NavigationStack {
+//            VideoListView(viewModel: VideoListViewModel(repository: repo))
+//        }
     }
 }
 

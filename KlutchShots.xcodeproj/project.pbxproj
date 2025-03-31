@@ -22,6 +22,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C6779C862D9B011200AB7145 /* Exceptions for "KlutchShots" folder in "KlutchShots" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C688E3A72D99C3E000693802 /* KlutchShots */;
+		};
 		C688E3CB2D99CE7300693802 /* Exceptions for "KlutchShots" folder in "KlutchShotsTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -32,6 +39,7 @@
 				Models/Video.swift,
 				Views/VideoDetailView.swift,
 				Views/VideoListView.swift,
+				Views/VideoPlayerView.swift,
 			);
 			target = C688E3BE2D99CC9700693802 /* KlutchShotsTests */;
 		};
@@ -41,6 +49,7 @@
 		C688E3AA2D99C3E000693802 /* KlutchShots */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				C6779C862D9B011200AB7145 /* Exceptions for "KlutchShots" folder in "KlutchShots" target */,
 				C688E3CB2D99CE7300693802 /* Exceptions for "KlutchShots" folder in "KlutchShotsTests" target */,
 			);
 			path = KlutchShots;
@@ -349,6 +358,7 @@
 				DEVELOPMENT_TEAM = 4UPZC3JM7B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KlutchShots/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -378,6 +388,7 @@
 				DEVELOPMENT_TEAM = 4UPZC3JM7B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KlutchShots/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
