@@ -12,7 +12,9 @@ struct ContentView: View {
     @State var repo = VideoRepository(api: VideoAPI())
 
     var body: some View {
-        VideoListView(viewModel: VideoListViewModel(repository: repo))
+        NavigationStack {
+            VideoListView(viewModel: VideoListViewModel(repository: repo))
+        }
     }
 }
 

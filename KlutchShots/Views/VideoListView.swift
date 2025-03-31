@@ -67,6 +67,7 @@ struct VideoListView: View {
 struct VideoListContentView: View {
 
     private var videos: [Video]
+    @State private var selectedVideo: Video?
 
     internal init(videos: [Video]) {
         self.videos = videos
@@ -74,9 +75,13 @@ struct VideoListContentView: View {
 
     var body: some View {
         List(videos) { video in
-            VideoRow(video: video)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+            NavigationLink(destination: {
+                VideoDetailView(video: video)
+            }, label: {
+                VideoRow(video: video)
+            })
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: -20))
+            .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
     }

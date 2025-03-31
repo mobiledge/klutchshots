@@ -30,6 +30,7 @@
 				DataAccess/VideoRepository.swift,
 				Fixtures/videos.json,
 				Models/Video.swift,
+				Views/VideoDetailView.swift,
 				Views/VideoListView.swift,
 			);
 			target = C688E3BE2D99CC9700693802 /* KlutchShotsTests */;
