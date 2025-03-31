@@ -49,6 +49,8 @@ struct VideoDetailView: View {
 
                     Text(video.description ?? "-")
                         .font(.body)
+
+                    VideoDownloadView(videoUrl: video.videoUrl, isLive: false)
                 }
                 .padding(.horizontal, 16)
             }
