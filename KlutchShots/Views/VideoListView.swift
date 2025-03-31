@@ -1,12 +1,16 @@
 import SwiftUI
 import Observation
 
+enum LoadingState<T> {
+    case loading
+    case loaded(T)
+    case error(Error)
+}
+
 @Observable
 class VideoListViewModel {
-    
-    private(set) var videos: [Video] = []
-    private(set) var isLoading = false
-    private(set) var error: Error?
+
+    private(set) var loadingState: LoadingState<[Video]> = .loading
 
     private let repository: VideoRepository
     internal init(repository: VideoRepository) {
@@ -14,17 +18,16 @@ class VideoListViewModel {
     }
 
     func fetchVideos() async {
-        isLoading = true
-        error = nil
+
+        try? await Task.sleep(for: Duration.seconds(5))
 
         do {
-            videos = try await repository.fetchAllVideos()
+            loadingState = .loading
+            let videos = try await repository.fetchAllVideos()
+            loadingState = .loaded(videos)
         } catch {
-            self.error = error
-            videos = []
+            loadingState = .error(error)
         }
-
-        isLoading = false
     }
 }
 
@@ -37,20 +40,21 @@ struct VideoListView: View {
     }
 
     var body: some View {
+
         Group {
-            if viewModel.isLoading {
+            switch viewModel.loadingState {
+            case .loading:
                 ProgressView()
-            } else if let error = viewModel.error {
-                ErrorView(error: error, retryAction: {
-                    Task { await viewModel.fetchVideos() }
-                })
-            } else {
-                List(viewModel.videos) { video in
-                    VideoRow(video: video)
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
+
+            case .loaded(let videos):
+                VideoListContentView(videos: videos)
+
+            case .error(let error):
+                ErrorView(error: error) {
+                    Task {
+                        await viewModel.fetchVideos()
+                    }
                 }
-                .listStyle(.plain)
             }
         }
         .task {
@@ -60,7 +64,25 @@ struct VideoListView: View {
     }
 }
 
-// ErrorView remains the same
+struct VideoListContentView: View {
+
+    private var videos: [Video]
+
+    internal init(videos: [Video]) {
+        self.videos = videos
+    }
+
+    var body: some View {
+        List(videos) { video in
+            VideoRow(video: video)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+        }
+        .listStyle(.plain)
+    }
+}
+
+
 struct ErrorView: View {
     let error: Error
     let retryAction: () -> Void
