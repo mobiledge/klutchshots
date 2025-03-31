@@ -2,6 +2,7 @@ import Foundation
 
 private let BASEURL = URL(string: "https://gist.githubusercontent.com/poudyalanil/ca84582cbeb4fc123a13290a586da925/raw/14a27bd0bcd0cd323b35ad79cf3b493dddf6216b")!
 
+@MainActor
 class VideoAPI {
 
     static let live = VideoAPI()
@@ -27,6 +28,7 @@ class VideoAPI {
     }
 }
 
+@MainActor
 class MockVideoAPI: VideoAPI {
     override func fetchAllVideos() async throws -> [Video] {
         let delay = Duration.milliseconds(500)

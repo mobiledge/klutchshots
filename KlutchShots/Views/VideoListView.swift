@@ -1,15 +1,79 @@
 import SwiftUI
+import Observation
+
+@Observable
+class VideoListViewModel {
+    
+    private(set) var videos: [Video] = []
+    private(set) var isLoading = false
+    private(set) var error: Error?
+
+    private let repository: VideoRepository
+    internal init(repository: VideoRepository) {
+        self.repository = repository
+    }
+
+    func fetchVideos() async {
+        isLoading = true
+        error = nil
+
+        do {
+            videos = try await repository.fetchAllVideos()
+        } catch {
+            self.error = error
+            videos = []
+        }
+
+        isLoading = false
+    }
+}
 
 struct VideoListView: View {
-    let videos: [Video]
+
+    @State private var viewModel: VideoListViewModel
+
+    internal init(viewModel: VideoListViewModel) {
+        self.viewModel = viewModel
+    }
 
     var body: some View {
-        List(videos) { video in
-            VideoRow(video: video)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
+        Group {
+            if viewModel.isLoading {
+                ProgressView()
+            } else if let error = viewModel.error {
+                ErrorView(error: error, retryAction: {
+                    Task { await viewModel.fetchVideos() }
+                })
+            } else {
+                List(viewModel.videos) { video in
+                    VideoRow(video: video)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                }
+                .listStyle(.plain)
+            }
         }
-        .listStyle(.plain)
+        .task {
+            await viewModel.fetchVideos()
+        }
+        .navigationTitle("Videos")
+    }
+}
+
+// ErrorView remains the same
+struct ErrorView: View {
+    let error: Error
+    let retryAction: () -> Void
+
+    var body: some View {
+        VStack {
+            Text("An error occurred: \(error.localizedDescription)")
+                .foregroundColor(.red)
+                .padding()
+
+            Button("Retry", action: retryAction)
+                .buttonStyle(.borderedProminent)
+        }
     }
 }
 
@@ -96,5 +160,11 @@ struct LiveBadge: View {
 }
 
 #Preview {
-    VideoListView(videos: Video.mockArray())
+    VideoListView(
+        viewModel: VideoListViewModel(
+            repository: VideoRepository(
+                api: VideoAPI()
+            )
+        )
+    )
 }

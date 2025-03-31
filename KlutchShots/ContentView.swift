@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
+
+    @State var repo = VideoRepository(api: VideoAPI())
+
     var body: some View {
-        VideoListView(videos: Video.mockArray())
+        VideoListView(viewModel: VideoListViewModel(repository: repo))
     }
 }
 
