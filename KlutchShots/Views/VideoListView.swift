@@ -7,6 +7,7 @@ enum LoadingState<T> {
     case error(Error)
 }
 
+@MainActor
 @Observable
 class VideoListViewModel {
 

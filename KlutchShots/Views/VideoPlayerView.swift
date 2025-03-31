@@ -18,7 +18,7 @@ final class VideoPlayerViewModel {
     init(videoURL: URL) {
         self.player = AVPlayer(url: videoURL)
         setupObservers()
-        player.play()
+//        player.play()
     }
 
     private func setupObservers() {
@@ -74,7 +74,7 @@ struct VideoPlayerView: View {
             VideoPlayer(player: viewModel.player)
                 .aspectRatio(16/9, contentMode: .fit)
                 .onAppear {
-                    viewModel.player.play()
+                    //viewModel.player.play()
                 }
                 .onDisappear {
                     viewModel.cleanup()

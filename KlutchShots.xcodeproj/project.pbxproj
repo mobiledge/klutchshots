@@ -38,6 +38,7 @@
 				Fixtures/videos.json,
 				Models/Video.swift,
 				Views/VideoDetailView.swift,
+				Views/VideoDownloadView.swift,
 				Views/VideoListView.swift,
 				Views/VideoPlayerView.swift,
 			);
