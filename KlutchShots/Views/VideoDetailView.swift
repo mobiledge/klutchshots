@@ -14,7 +14,7 @@ struct VideoDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                VideoPlayerView(url: video.videoUrl)
+                VideoPlayerView(videoURL: video.videoUrl)
 
                 // Video info
                 VStack(alignment: .leading, spacing: 8) {
