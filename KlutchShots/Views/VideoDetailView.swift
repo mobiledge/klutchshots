@@ -13,25 +13,8 @@ struct VideoDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Video thumbnail
-                AsyncImage(url: URL(string: video.thumbnailUrl)) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                            .frame(maxWidth: .infinity, minHeight: 200)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fit)
-                    case .failure:
-                        Image(systemName: "photo")
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fit)
-                            .foregroundColor(.gray)
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
+
+                VideoPlayerView(url: video.videoUrl)
 
                 // Video info
                 VStack(alignment: .leading, spacing: 8) {
@@ -75,6 +58,6 @@ struct VideoDetailView: View {
     }
 }
 
-#Preview {
-    VideoDetailView(video: Video.mockArray().first!)
-}
+//#Preview {
+//    VideoDetailView(video: Video.mockArray().first!)
+//}

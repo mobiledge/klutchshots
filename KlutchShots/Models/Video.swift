@@ -16,7 +16,7 @@ struct Video: Codable, Identifiable, Hashable {
     let uploadTime: String
     let views: String
     let author: String
-    let videoUrl: String
+    let videoUrl: URL
     let description: String?
     let subscriber: String?
     let isLive: Bool
