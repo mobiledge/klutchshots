@@ -1,21 +1,21 @@
 import SwiftUI
 import Observation
 
-enum LoadingState<T> {
-    case loading
-    case loaded(T)
-    case error(Error)
-}
-
 @MainActor
 @Observable
 class VideoListViewModel {
 
-    private(set) var loadingState: LoadingState<[Video]> = .loading
+    enum LoadingState<T> {
+        case loading
+        case loaded(T)
+        case error(Error)
+    }
 
-    private let repository: VideoRepository
-    internal init(repository: VideoRepository) {
-        self.repository = repository
+    var loadingState: LoadingState<[Video]> = .loading
+    private let networkService: NetworkService
+
+    init(networkService: NetworkService = .shared) {
+        self.networkService = networkService
     }
 
     func fetchVideos() async {
@@ -24,7 +24,7 @@ class VideoListViewModel {
 
         do {
             loadingState = .loading
-            let videos = try await repository.fetchAllVideos()
+            let videos = try await networkService.fetchVideos()
             loadingState = .loaded(videos)
         } catch {
             loadingState = .error(error)
@@ -187,12 +187,50 @@ struct LiveBadge: View {
     }
 }
 
-#Preview {
-    VideoListView(
-        viewModel: VideoListViewModel(
-            repository: VideoRepository(
-                api: VideoAPI()
+// MARK: - Loaded Preview
+class LoadedVideoListViewModel: VideoListViewModel {
+    override func fetchVideos() async {
+        loadingState = .loaded(Videos.mock)
+    }
+}
+
+#Preview("Loaded State") {
+    NavigationStack {
+        VideoListView(viewModel: LoadedVideoListViewModel())
+    }
+}
+
+// MARK: - Loading Preview
+class LoadingVideoListViewModel: VideoListViewModel {
+    override func fetchVideos() async {
+        loadingState = .loading
+    }
+}
+
+#Preview("Loading state") {
+    NavigationStack {
+        VideoListView(viewModel: LoadingVideoListViewModel())
+    }
+}
+
+
+// MARK: - Error Preview
+class ErrorVideoListViewModel: VideoListViewModel {
+    override func fetchVideos() async {
+        loadingState = .error(
+            NSError(
+                domain: "com.example.error",
+                code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Something went wrong."]
             )
         )
-    )
+    }
 }
+
+#Preview("Error State") {
+    NavigationStack {
+        VideoListView(viewModel: ErrorVideoListViewModel())
+    }
+}
+
+
