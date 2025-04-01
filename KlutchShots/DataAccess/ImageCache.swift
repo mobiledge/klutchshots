@@ -1,68 +1,63 @@
+//
+//  ImageCache.swift
+//  NetworkService
+//
+//  Created by Rabin Joshi on 2025-04-01.
+//
+
+import Foundation
 import UIKit
 
-//actor ImageCache {
-//    static let shared = ImageCache()
-//
-//    private var memoryCache = NSCache<NSString, UIImage>()
-//    private let cacheDirectory: URL
-//
-//    init() {
-//        memoryCache.name = "ImageCache"
-//        memoryCache.countLimit = 100
-//
-//        let folderURLs = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
-//        cacheDirectory = folderURLs[0].appendingPathComponent("ImageCache")
-//
-//        try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-//    }
-//
-//    func fetch(url: URL) -> UIImage? {
-//        let fileName = fileName(for: url)
-//        if let memoryImage = memoryCache.object(forKey: fileName as NSString) {
-//            return memoryImage
-//        }
-//        if let diskImage = loadFromDisk(fileName: fileName) {
-//            memoryCache.setObject(diskImage, forKey: fileName as NSString)
-//            return diskImage
-//        }
-//        return nil
-//    }
-//
-//    func save(image: UIImage, url: URL) {
-//        let fileName = fileName(for: url)
-//        memoryCache.setObject(image, forKey: fileName as NSString)
-//        saveToDisk(image: image, fileName: fileName)
-//    }
-//
-//    func clearCache() {
-//        memoryCache.removeAllObjects()
-//        try? FileManager.default.removeItem(at: cacheDirectory)
-//        try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-//    }
-//
-//    private func loadFromDisk(fileName: String) -> UIImage? {
-//        let fileURL = cacheDirectory.appendingPathComponent(fileName)
-//        guard let data = try? Data(contentsOf: fileURL) else { return nil }
-//        return UIImage(data: data)
-//    }
-//
-//    private func saveToDisk(image: UIImage, fileName: String) {
-//        guard let data = image.jpegData(compressionQuality: 1.0) else {
-//            print("Error: Failed to create JPEG data from image")
-//            return
-//        }
-//        let filePath = cacheDirectory.appendingPathComponent(fileName)
-//        do {
-//            try data.write(to: filePath)
-//            print("Image saved successfully at: \(filePath.path)")
-//        } catch {
-//            print("Error saving image: \(error.localizedDescription)")
-//        }
-//    }
-//
-//    private func fileName(for url: URL) -> String {
-//        let sanitized = url.absoluteString
-//            .replacingOccurrences(of: "[^a-zA-Z0-9]", with: "_", options: .regularExpression)
-//        return String(sanitized.prefix(255))
-//    }
-//}
+actor ImageCache {
+    private let fileManager: FileManager
+    private let cacheDirectory: URL
+
+    init() {
+        self.fileManager = FileManager.default
+
+        // Get the cache directory in the app's documents folder
+        let cachesDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        self.cacheDirectory = cachesDirectory.appendingPathComponent("ImageCache", isDirectory: true)
+
+        // Create cache directory if it doesn't exist
+        try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+    }
+
+    func fetch(for url: URL) async -> UIImage? {
+        let fileName = sanitizedFileName(for: url)
+        let fileURL = cacheDirectory.appendingPathComponent(fileName)
+
+        guard fileManager.fileExists(atPath: fileURL.path) else {
+            return nil
+        }
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("Error reading cached image: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    func save(_ image: UIImage, for url: URL) async {
+        let fileName = sanitizedFileName(for: url)
+        let fileURL = cacheDirectory.appendingPathComponent(fileName)
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("Could not convert image to data")
+            return
+        }
+        do {
+            try data.write(to: fileURL)
+            print("Saved to \(fileURL.absoluteString)")
+        } catch {
+            print("Error saving image to cache: \(error.localizedDescription)")
+        }
+    }
+
+    func sanitizedFileName(for url: URL) -> String {
+        let sanitized = url.absoluteString
+            .replacingOccurrences(of: "[^a-zA-Z0-9]", with: "_", options: .regularExpression)
+        return String(sanitized.prefix(255))
+    }
+}

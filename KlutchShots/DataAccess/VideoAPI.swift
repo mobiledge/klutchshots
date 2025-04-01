@@ -11,7 +11,7 @@ class VideoAPI {
     func fetchAllVideos() async throws -> [Video] {
         let url = BASEURL.appendingPathComponent("videos.json")
         let data = try await get(url: url)
-        return try Video.decodeArray(from: data)
+        return try Videos(jsonData: data)
     }
 
     private func get(url: URL) async throws -> Data {
@@ -33,7 +33,7 @@ class MockVideoAPI: VideoAPI {
     override func fetchAllVideos() async throws -> [Video] {
         let delay = Duration.milliseconds(500)
         try await Task.sleep(for: delay)
-        let videos = Video.mockArray()
+        let videos = Videos.mock
         return videos
     }
 }

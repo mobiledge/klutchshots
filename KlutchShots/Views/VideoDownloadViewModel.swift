@@ -149,5 +149,5 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 }
 
 #Preview {
-    VideoDownloadView(videoUrl: Video.mockArray().first!.videoUrl, isLive: false)
+    VideoDownloadView(videoUrl: Videos.mock.first!.videoUrl, isLive: false)
 }

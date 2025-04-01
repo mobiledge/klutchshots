@@ -33,7 +33,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				DataAccess/ImageCache.swift,
-				DataAccess/ImageFetcher.swift,
+				DataAccess/ImageFetcherLegacy.swift,
 				DataAccess/RequestDispatcher.swift,
 				DataAccess/VideoAPI.swift,
 				DataAccess/VideoRepository.swift,

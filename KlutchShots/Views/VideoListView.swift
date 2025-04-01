@@ -20,7 +20,7 @@ class VideoListViewModel {
 
     func fetchVideos() async {
 
-        try? await Task.sleep(for: Duration.seconds(5))
+//        try? await Task.sleep(for: Duration.seconds(5))
 
         do {
             loadingState = .loading
@@ -37,7 +37,7 @@ struct VideoListView: View {
     @State private var viewModel: VideoListViewModel
 
     internal init(viewModel: VideoListViewModel) {
-        self.viewModel = viewModel
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {

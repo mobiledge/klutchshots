@@ -61,5 +61,5 @@ struct VideoDetailView: View {
 }
 
 #Preview {
-    VideoDetailView(video: Video.mockArray().first!)
+    VideoDetailView(video: Videos.mock.first!)
 }

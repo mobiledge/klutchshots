@@ -1,10 +1,9 @@
 //
 //  Video.swift
-//  KlutchShots
+//  NetworkService
 //
-//  Created by Rabin Joshi on 2025-03-30.
+//  Created by Rabin Joshi on 2025-04-01.
 //
-
 
 import Foundation
 
@@ -22,41 +21,43 @@ struct Video: Codable, Identifiable, Hashable {
     let isLive: Bool
 }
 
+typealias Videos = [Video]
+extension Videos {
 
-// Example of decoding JSON data
-extension Video {
-    static func decodeArray(from jsonData: Data) throws -> [Video] {
-        let decoder = JSONDecoder()
-        return try decoder.decode([Video].self, from: jsonData)
-    }
-}
+    /// JSON encoding & decoding
+    static let decoder = JSONDecoder()
+    static let encoder = JSONEncoder()
 
-// Mocks
-extension Video {
-
-    static func mockSuccessResponse(request: URLRequest) -> (Data, URLResponse) {
-        let response = HTTPURLResponse(
-            url: request.url!,
-            statusCode: 200,
-            httpVersion: nil,
-            headerFields: ["Content-Type": "application/json"]
-        )!
-        let data = mockData()
-        return (data, response)
+    init(jsonData: Data) throws {
+        self = try Self.decoder.decode(Videos.self, from: jsonData)
     }
 
-    static func mockArray() -> [Video] {
-        let data = bundleContents("videos.json")
-        return try! Video.decodeArray(from: data)
+    func toJsonData() throws -> Data {
+        try Self.encoder.encode(self)
     }
 
-    static func mockData() -> Data {
-        bundleContents("videos.json")
-    }
-}
 
-func bundleContents(_ resource: String) -> Data {
-    let url = Bundle.main.url(forResource: resource, withExtension: nil)!
-    let data = try! Data(contentsOf: url)
-    return data
+    /// Mock data
+    static var mock: Videos {
+        do {
+            return try Videos(jsonData: bundleContents("videos.json"))
+        } catch {
+            print("ERROR: Failed to create mock Videos: \(error)")
+            return Videos()
+        }
+    }
+
+    static func bundleContents(_ resource: String) -> Data {
+        guard let url = Bundle.main.url(forResource: resource, withExtension: nil) else {
+            print("ERROR: Could not find resource '\(resource)' in bundle")
+            return Data()
+        }
+
+        do {
+            return try Data(contentsOf: url)
+        } catch {
+            print("ERROR: Failed to load data from \(url.path): \(error)")
+            return Data()
+        }
+    }
 }
