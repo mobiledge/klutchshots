@@ -1,17 +1,13 @@
-//
-//  DownloadView.swift
-//  NetworkService
-//
-//  Created by Rabin Joshi on 2025-04-01.
-//
-
-
 import Combine
 import SwiftUI
 
+// MARK: - ViewModel
+
 @MainActor
 @Observable
-class DownloadViewModel {
+final class DownloadViewModel {
+
+    // MARK: - State
 
     enum DownloadState {
         case idle
@@ -20,18 +16,24 @@ class DownloadViewModel {
         case failed(error: Error)
     }
 
+    // MARK: - Properties
+
     private let video: Video
     private let downloadService = DownloadService()
     private var cancellables = Set<AnyCancellable>()
+
     var downloadState: DownloadState = .idle
     var isDownloading = false
+
+    // MARK: - Initialization
 
     init(video: Video) {
         self.video = video
     }
 
-    func downloadFile() {
+    // MARK: - Public Methods
 
+    func downloadFile() {
         isDownloading = true
         downloadState = .downloading(progress: 0)
 
@@ -63,91 +65,105 @@ class DownloadViewModel {
     }
 }
 
-
+// MARK: - View
 
 struct DownloadView: View {
-
     @State private var viewModel: DownloadViewModel
+
+    // MARK: - Initialization
 
     init(viewModel: DownloadViewModel) {
         _viewModel = State(wrappedValue: viewModel)
     }
 
+    // MARK: - Body
+
     var body: some View {
+        Group {
+            switch viewModel.downloadState {
+            case .idle:
+                idleView
 
-        switch viewModel.downloadState {
-        case .idle:
-            VStack(spacing: 20) {
+            case .downloading(let progress):
+                downloadingView(progress: progress)
 
-                Button("Start Download") {
-                    viewModel.downloadFile()
-                }
-                .buttonStyle(BorderedProminentButtonStyle())
+            case .finished(let fileURL):
+                finishedView(fileURL: fileURL)
 
-                Text("Ready to download")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            case .failed(let error):
+                failedView(error: error)
             }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
 
-        case .downloading(let progress):
-            VStack(spacing: 20) {
-                Button("Cancel Download") {
-                    viewModel.cancelDownload()
-                }
-                .buttonStyle(BorderedButtonStyle())
-                .tint(.red)
+    // MARK: - Subviews
 
-                ProgressView(value: progress, total: 1.0)
-                    .progressViewStyle(LinearProgressViewStyle())
-                    .frame(height: 8)
-
-                Text("Downloading: \(Int(progress * 100))%")
+    private var idleView: some View {
+        VStack(spacing: 20) {
+            Button("Start Download") {
+                viewModel.downloadFile()
             }
-            .padding()
+            .buttonStyle(.borderedProminent)
 
-        case .finished(let fileURL):
+            Text("Ready to download")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private func downloadingView(progress: Double) -> some View {
+        VStack(spacing: 20) {
+            Button("Cancel Download") {
+                viewModel.cancelDownload()
+            }
+            .buttonStyle(.bordered)
+            .tint(.red)
+
+            ProgressView(value: progress, total: 1.0)
+                .progressViewStyle(.linear)
+                .frame(height: 8)
+
+            Text("Downloading: \(Int(progress * 100))%")
+        }
+    }
+
+    private func finishedView(fileURL: URL) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green)
+                .font(.system(size: 48))
+
+            Text("Download complete")
+                .font(.headline)
+
             VStack {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                    .font(.system(size: 48))
-                Text("Download complete")
                 Text("File saved at:")
                     .font(.caption)
                 Text(fileURL.absoluteString)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+        }
+    }
 
-        case .failed(let error):
-            VStack(spacing: 20) {
-
-                Button("Restart Download") {
-                    viewModel.downloadFile()
-                }
-                .buttonStyle(BorderedProminentButtonStyle())
-
-                Text(error.localizedDescription.capitalized)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+    private func failedView(error: Error) -> some View {
+        VStack(spacing: 20) {
+            Button("Restart Download") {
+                viewModel.downloadFile()
             }
+            .buttonStyle(.borderedProminent)
+
+            Text(error.localizedDescription.capitalized)
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
     }
 }
 
+// MARK: - Preview
+
 #Preview {
     DownloadView(viewModel: DownloadViewModel(video: Videos.mock.first!))
-}
-
-
-// Helper extensions for error handling
-extension DownloadViewModel.DownloadState {
-    var isError: Bool {
-        if case .failed = self { return true }
-        return false
-    }
-
-    var error: (any Error)? {
-        if case .failed(let error) = self { return error }
-        return nil
-    }
 }
