@@ -94,6 +94,9 @@ struct VideoPlayerView: View {
             errorView
         }
         .frame(maxWidth: .infinity)
+        .onAppear {
+            viewModel.player.play()
+        }
     }
 
     private var playerBackground: some View {
