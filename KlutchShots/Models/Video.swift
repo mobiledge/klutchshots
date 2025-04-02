@@ -9,8 +9,8 @@ struct Video: Codable, Identifiable, Hashable {
     let views: String
     let author: String
     let videoUrl: URL
-    let description: String?
-    let subscriber: String?
+    let description: String
+    let subscriber: String
     let isLive: Bool
 }
 

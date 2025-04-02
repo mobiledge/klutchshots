@@ -12,7 +12,7 @@ class VideoDetailViewModel: ObservableObject {
     var views: String { "\(video.views) views" }
     var isLive: Bool { video.isLive }
     var duration: String { video.duration }
-    var description: String { video.description ?? "-" }
+    var description: String { video.description }
     var videoUrl: URL { video.videoUrl }
 
     // MARK: - Initialization

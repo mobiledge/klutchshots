@@ -32,15 +32,7 @@
 		C688E3CB2D99CE7300693802 /* Exceptions for "KlutchShots" folder in "KlutchShotsTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				DataAccess/DownloadService.swift,
-				DataAccess/ImageCache.swift,
 				Fixtures/videos.json,
-				Models/Video.swift,
-				Views/DownloadView.swift,
-				Views/ThumbnailImage.swift,
-				Views/VideoDetailView.swift,
-				Views/VideoListView.swift,
-				Views/VideoPlayerView.swift,
 			);
 			target = C688E3BE2D99CC9700693802 /* KlutchShotsTests */;
 		};
