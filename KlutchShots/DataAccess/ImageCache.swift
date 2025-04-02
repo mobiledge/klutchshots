@@ -19,7 +19,7 @@ actor ImageCache {
         do {
             try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
         } catch {
-            print("Failed to create cache directory: \(error.localizedDescription)")
+            print("‼️Failed to create cache directory: \(error.localizedDescription)")
         }
     }
 
@@ -35,7 +35,7 @@ actor ImageCache {
             let data = try Data(contentsOf: fileURL)
             return UIImage(data: data)
         } catch {
-            print("Error reading cached image: \(error.localizedDescription)")
+            print("‼️Error reading cached image: \(error.localizedDescription)")
             return nil
         }
     }
@@ -46,15 +46,14 @@ actor ImageCache {
         let fileURL = cacheDirectory.appendingPathComponent(fileName)
 
         guard let data = image.jpegData(compressionQuality: 1.0) else {
-            print("Could not convert image to data")
+            print("‼️Could not convert image to data")
             return
         }
 
         do {
             try data.write(to: fileURL)
-            print("Saved to \(fileURL.absoluteString)")
         } catch {
-            print("Error saving image to cache: \(error.localizedDescription)")
+            print("‼️Error saving image to cache: \(error.localizedDescription)")
         }
     }
 
@@ -68,9 +67,9 @@ actor ImageCache {
             for fileURL in fileURLs {
                 try fileManager.removeItem(at: fileURL)
             }
-            print("Cache cleared successfully")
+            print("‼️Cache cleared successfully")
         } catch {
-            print("Error clearing cache: \(error.localizedDescription)")
+            print("‼️Error clearing cache: \(error.localizedDescription)")
         }
     }
 

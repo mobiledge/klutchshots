@@ -72,7 +72,7 @@ extension NetworkService: VideoFetching {
             try validateHTTPResponse(response)
             return try Videos(jsonData: data)
         } catch {
-            print("Network error: \(error)")
+            print("‼️Network error: \(error)")
             throw error
         }
     }
@@ -101,7 +101,7 @@ extension NetworkService: ImageFetching {
             await imageCache.save(image, for: url)
             return image
         } catch {
-            print("Error fetching image from network: \(error.localizedDescription)")
+            print("‼️Error fetching image from network: \(error.localizedDescription)")
             throw error
         }
     }

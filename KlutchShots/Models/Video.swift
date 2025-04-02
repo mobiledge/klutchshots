@@ -22,7 +22,7 @@ extension Videos: JSONConvertible, BundleLoadable {
         do {
             return try Videos(bundleResource: "videos.json")
         } catch {
-            print("ERROR: Failed to create mock Videos: \(error)")
+            print("‼️ERROR: Failed to create mock Videos: \(error)")
             return Videos()
         }
     }
