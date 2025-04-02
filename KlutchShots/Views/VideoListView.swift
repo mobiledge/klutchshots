@@ -35,6 +35,9 @@ class VideoListViewModel {
 
     func fetchVideos() async {
         do {
+            if case .loaded(_) = loadingState {
+                return
+            }
             loadingState = .loading
             let videos = try await networkService.fetchVideos()
             loadingState = .loaded(videos)
@@ -159,7 +162,7 @@ struct VideoRow: View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .bottomTrailing) {
 
-                AsyncCachedImage(
+                                ThumbnailImage(
                     viewModel: AsyncCachedImageViewModel(
                         url: video.thumbnailUrl
                     )

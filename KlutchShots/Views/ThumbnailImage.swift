@@ -10,12 +10,13 @@ import SwiftUI
 @MainActor
 @Observable
 class AsyncCachedImageViewModel {
-    internal init(url: URL) {
-        self.url = url
-    }
 
     let url: URL
     var loadingState = LoadingState<UIImage>.loading
+
+    init(url: URL) {
+        self.url = url
+    }
 
     func reloadData() async {
         do {
@@ -31,7 +32,7 @@ class AsyncCachedImageViewModel {
     }
 }
 
-struct AsyncCachedImage: View {
+struct ThumbnailImage: View {
     @State private var viewModel: AsyncCachedImageViewModel
 
     init(viewModel: AsyncCachedImageViewModel) {
@@ -65,14 +66,11 @@ struct AsyncCachedImage: View {
     }
 }
 
-/// https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp
-/// https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg
-
 #Preview {
-    AsyncCachedImage(viewModel: AsyncCachedImageViewModel(url: URL(string: "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg")!))
+    ThumbnailImage(viewModel: AsyncCachedImageViewModel(url: URL(string: "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg")!))
 }
 
 #Preview {
-    AsyncCachedImage(viewModel: AsyncCachedImageViewModel(url: URL(string: "https://example.com")!))
+    ThumbnailImage(viewModel: AsyncCachedImageViewModel(url: URL(string: "https://example.com")!))
 }
 
