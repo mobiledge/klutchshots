@@ -1,6 +1,9 @@
 import SwiftUI
 import Observation
 
+// MARK: - Loading State
+
+/// Represents the different states of an asynchronous loading operation
 enum LoadingState<T> {
     case loading
     case loaded(T)
@@ -22,52 +25,60 @@ extension LoadingState: Equatable where T: Equatable {
     }
 }
 
+// MARK: - View Model
+
 @MainActor
 @Observable
 class VideoListViewModel {
 
+    // MARK: - Properties
+
     var loadingState: LoadingState<[Video]> = .loading
     private let networkService: NetworkService
+
+    // MARK: - Initialization
 
     init(networkService: NetworkService = .shared) {
         self.networkService = networkService
     }
 
+    // MARK: - Public Methods
+
     func fetchVideos() async {
+        // Skip if already loaded
+        if case .loaded = loadingState {
+            return
+        }
+
+        loadingState = .loading
+
         do {
-            if case .loaded(_) = loadingState {
-                return
-            }
-            loadingState = .loading
             let videos = try await networkService.fetchVideos()
             loadingState = .loaded(videos)
         } catch {
             loadingState = .error(error)
         }
     }
+}
 
-    /**
-     Mock subclasses used for SwiftUI previews and testing.
-     These subclasses override `fetchVideos()` to provide predefined states
-     without making actual network requests. This allows the UI to be previewed
-     in different loading conditions:
-     - `LoadingPreview`: Simulates a loading state.
-     - `LoadedPreview`: Simulates a successful fetch with mock video data.
-     - `ErrorPreview`: Simulates an error state with a predefined error message.
-     */
+// MARK: - Preview Subclasses
 
+extension VideoListViewModel {
+    /// Mock subclass for previewing loading state
     final class LoadingPreview: VideoListViewModel {
         override func fetchVideos() async {
             loadingState = .loading
         }
     }
 
+    /// Mock subclass for previewing loaded state with mock data
     final class LoadedPreview: VideoListViewModel {
         override func fetchVideos() async {
             loadingState = .loaded(Videos.mock)
         }
     }
 
+    /// Mock subclass for previewing error state
     final class ErrorPreview: VideoListViewModel {
         override func fetchVideos() async {
             loadingState = .error(
@@ -81,9 +92,9 @@ class VideoListViewModel {
     }
 }
 
+// MARK: - Main View
 
 struct VideoListView: View {
-
     @State private var viewModel: VideoListViewModel
 
     init(viewModel: VideoListViewModel) {
@@ -91,7 +102,6 @@ struct VideoListView: View {
     }
 
     var body: some View {
-
         Group {
             switch viewModel.loadingState {
             case .loading:
@@ -102,9 +112,7 @@ struct VideoListView: View {
 
             case .error(let error):
                 ErrorView(error: error) {
-                    Task {
-                        await viewModel.fetchVideos()
-                    }
+                    Task { await viewModel.fetchVideos() }
                 }
             }
         }
@@ -115,29 +123,29 @@ struct VideoListView: View {
     }
 }
 
-struct VideoListContentView: View {
+// MARK: - Content Views
 
+struct VideoListContentView: View {
     private var videos: [Video]
     @State private var selectedVideo: Video?
 
-    internal init(videos: [Video]) {
+    init(videos: [Video]) {
         self.videos = videos
     }
 
     var body: some View {
         List(videos) { video in
-            NavigationLink(destination: {
+            NavigationLink {
                 VideoDetailView(viewModel: VideoDetailViewModel(video: video))
-            }, label: {
+            } label: {
                 VideoRow(video: video)
-            })
+            }
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: -20))
             .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
     }
 }
-
 
 struct ErrorView: View {
     let error: Error
@@ -161,8 +169,7 @@ struct VideoRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .bottomTrailing) {
-
-                                ThumbnailImage(
+                ThumbnailImage(
                     viewModel: AsyncCachedImageViewModel(
                         url: video.thumbnailUrl
                     )
@@ -199,6 +206,8 @@ struct VideoRow: View {
     }
 }
 
+// MARK: - Badge Views
+
 struct DurationBadge: View {
     let duration: String
 
@@ -225,14 +234,15 @@ struct LiveBadge: View {
     }
 }
 
-// MARK: - Loaded Preview
+// MARK: - Previews
+
 #Preview("Loaded State") {
     NavigationStack {
         VideoListView(viewModel: VideoListViewModel.LoadedPreview())
     }
 }
 
-#Preview("Loading state") {
+#Preview("Loading State") {
     NavigationStack {
         VideoListView(viewModel: VideoListViewModel.LoadingPreview())
     }
@@ -243,5 +253,3 @@ struct LiveBadge: View {
         VideoListView(viewModel: VideoListViewModel.ErrorPreview())
     }
 }
-
-

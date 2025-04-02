@@ -118,8 +118,18 @@ struct DownloadView: View {
                     .foregroundColor(.secondary)
             }
 
-        case .failed:
-            EmptyView() // Error shown in alert
+        case .failed(let error):
+            VStack(spacing: 20) {
+
+                Button("Restart Download") {
+                    viewModel.downloadFile()
+                }
+                .buttonStyle(BorderedProminentButtonStyle())
+
+                Text(error.localizedDescription.capitalized)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }
