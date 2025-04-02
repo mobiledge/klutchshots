@@ -12,7 +12,7 @@ struct NetworkSession {
 }
 
 /// A network service actor that handles API requests and image caching
-class NetworkService {
+actor NetworkService {
 
     // MARK: - Shared Instance
     static let shared = NetworkService()
