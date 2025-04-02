@@ -68,14 +68,6 @@ Note that tests for other View Models (like `VideoDetailViewModel`, `VideoPlayer
 
 ## Build and Run Instructions
 
-### Prerequisites
-
-*   macOS with Xcode installed
-*   CocoaPods
-*   iOS device or simulator
-
-### Steps
-
 1.  **Clone the Repository:**
 
     ```
@@ -85,7 +77,7 @@ Note that tests for other View Models (like `VideoDetailViewModel`, `VideoPlayer
 
 2.  **Open the Project:**
 
-    Open `KlutchShots.xcworkspace` in Xcode.
+    Open `KlutchShots.xcodeproj` in Xcode.
     
 4.  **Build and Run:**
 
