@@ -57,12 +57,12 @@ VideoDownloader()
 
 The following tests have been implemented particularly focusing on the data access layer:
 
-* `DataUtilsTests`: Tests for JSON encoding/decoding and bundle resource loading, ensuring data integrity and proper configuration handling.
-* `VideoTests`: Tests for `Video` model encoding, decoding, and mock data loading, verifying the correctness of data model operations.
-* `ImageCacheTests`: Tests for saving, fetching, and managing cached images, crucial for efficient data retrieval and reducing network load. This ensures the caching mechanism functions as expected.
-* `NetworkServiceTests`: Tests for fetching video data and images from the network. These tests cover success scenarios, network error handling, HTTP status code error handling, and decoding error handling, thoroughly validating the network communication and data retrieval processes.
-* `VideoDownloaderTests`: Tests for download progress updates, download completion, and download cancellation, ensuring robust file download functionality.
-* `VideoListViewModelTests`: Tests for the `VideoListViewModel`, covering initial loading state, successful video fetching, error handling, and caching behavior to prevent redundant fetches. This ViewModel relies heavily on the data access layer, and its tests indirectly validate the integration of these components.
+* `DataUtilsTests`: Tests for JSON encoding/decoding and bundle resource loading.
+* `VideoTests`: Tests for `Video` model encoding, decoding, and mock data loading.
+* `ImageCacheTests`: Tests for saving, fetching, and managing cached images.
+* `NetworkServiceTests`: Tests for fetching video data and images from the network. 
+* `VideoDownloaderTests`: Tests for download progress, completion, and cancellation.
+* `VideoListViewModelTests`: Tests covering initial loading state, successful video fetching, error handling etc.
 
 Note that tests for other View Models (like `VideoDetailViewModel`, `VideoPlayerViewModel`, and `DownloadViewModel`) are not currently implemented, but could be added following a similar approach to `VideoListViewModelTests`.
 
