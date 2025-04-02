@@ -1,27 +1,31 @@
 import Foundation
 import Combine
 
-class DownloadService {
+/// A service that handles file downloads with progress tracking using Combine.
+///
+/// This implementation uses Apple's Combine framework to provide reactive download progress
+/// and completion handling.
+final class DownloadService {
+
+    /// Represents the possible results of a download operation using Combine publishers.
     enum DownloadResult {
         case fractionCompleted(Double)
         case completed(URL)
     }
 
+    // MARK: - Properties
+
     private var task: URLSessionDownloadTask?
     private var observation: NSKeyValueObservation?
 
+    // MARK: - Public Methods
     func downloadWithProgress(from url: URL) -> AnyPublisher<DownloadResult, Error> {
         let subject = PassthroughSubject<DownloadResult, Error>()
-
-        // Clean up any existing task and observation
-        task?.cancel()
-        observation?.invalidate()
+        cancelCurrentDownload()
 
         let task = URLSession.shared.downloadTask(with: url) { [weak self] tempURL, _, error in
             defer {
-                self?.task = nil
-                self?.observation?.invalidate()
-                self?.observation = nil
+                self?.cancelCurrentDownload()
             }
 
             if let error = error {
@@ -49,17 +53,10 @@ class DownloadService {
         return subject
             .handleEvents(
                 receiveCancel: { [weak self] in
-                    self?.task?.cancel()
-                    self?.observation?.invalidate()
-                    self?.task = nil
-                    self?.observation = nil
+                    self?.cancelCurrentDownload()
                 }
             )
             .eraseToAnyPublisher()
-    }
-
-    deinit {
-        cancelCurrentDownload()
     }
 
     func cancelCurrentDownload() {
@@ -67,5 +64,11 @@ class DownloadService {
         observation?.invalidate()
         task = nil
         observation = nil
+    }
+
+    // MARK: - Deinitialization
+
+    deinit {
+        cancelCurrentDownload()
     }
 }
