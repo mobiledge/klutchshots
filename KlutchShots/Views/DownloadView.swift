@@ -70,7 +70,7 @@ struct DownloadView: View {
     @State private var viewModel: DownloadViewModel
 
     init(viewModel: DownloadViewModel) {
-        _viewModel = State(initialValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     var body: some View {

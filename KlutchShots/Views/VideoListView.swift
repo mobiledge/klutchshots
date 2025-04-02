@@ -87,7 +87,7 @@ struct VideoListView: View {
     @State private var viewModel: VideoListViewModel
 
     init(viewModel: VideoListViewModel) {
-        _viewModel = State(initialValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     var body: some View {
@@ -127,7 +127,7 @@ struct VideoListContentView: View {
     var body: some View {
         List(videos) { video in
             NavigationLink(destination: {
-                VideoDetailView(video: video)
+                VideoDetailView(viewModel: VideoDetailViewModel(video: video))
             }, label: {
                 VideoRow(video: video)
             })

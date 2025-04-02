@@ -36,7 +36,7 @@ struct ThumbnailImage: View {
     @State private var viewModel: AsyncCachedImageViewModel
 
     init(viewModel: AsyncCachedImageViewModel) {
-        _viewModel = State(initialValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     var body: some View {

@@ -7,32 +7,60 @@
 
 import SwiftUI
 
-struct VideoDetailView: View {
+class VideoDetailViewModel: ObservableObject {
+    // MARK: - Input Properties
     let video: Video
+
+    // MARK: - Output Properties
+    var title: String { video.title }
+    var author: String { video.author }
+    var views: String { "\(video.views) views" }
+    var isLive: Bool { video.isLive }
+    var duration: String { video.duration }
+    var description: String { video.description ?? "-" }
+    var videoUrl: URL { video.videoUrl }
+
+    init(video: Video) {
+        self.video = video
+    }
+}
+
+// Extension for preview purposes
+extension VideoDetailViewModel {
+    static func mock() -> VideoDetailViewModel {
+        return VideoDetailViewModel(video: Videos.mock[0])
+    }
+}
+
+struct VideoDetailView: View {
+    @State var viewModel: VideoDetailViewModel
+
+    init(viewModel: VideoDetailViewModel) {
+        _viewModel = State(wrappedValue: viewModel)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-
-                VideoPlayerView(videoURL: video.videoUrl)
+                VideoPlayerView(videoURL: viewModel.videoUrl)
 
                 // Video info
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(video.title)
+                    Text(viewModel.title)
                         .font(.title)
                         .fontWeight(.bold)
 
                     HStack(spacing: 4) {
-                        Text(video.author)
+                        Text(viewModel.author)
                             .font(.headline)
                             .foregroundColor(.secondary)
 
-                        Text("· \(video.views) views")
+                        Text("· \(viewModel.views)")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
 
-                    if video.isLive {
+                    if viewModel.isLive {
                         HStack {
                             LiveBadge()
                             Text("Streaming now")
@@ -40,14 +68,14 @@ struct VideoDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                     } else {
-                        Text("Duration: \(video.duration)")
+                        Text("Duration: \(viewModel.duration)")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
 
                     Divider()
 
-                    Text(video.description ?? "-")
+                    Text(viewModel.description)
                         .font(.body)
                         .padding(.vertical, 10)
 
@@ -55,7 +83,11 @@ struct VideoDetailView: View {
 
                     HStack {
                         Spacer()
-                        DownloadView(viewModel: DownloadViewModel(video: video))
+                        DownloadView(
+                            viewModel: DownloadViewModel(
+                                video: viewModel.video
+                            )
+                        )
                             .padding()
                         Spacer()
                     }
@@ -63,11 +95,13 @@ struct VideoDetailView: View {
                 .padding(.horizontal, 16)
             }
         }
-        .navigationTitle(video.title)
+        .navigationTitle(viewModel.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    VideoDetailView(video: Videos.mock.first!)
+    NavigationView {
+        VideoDetailView(viewModel: VideoDetailViewModel.mock())
+    }
 }
