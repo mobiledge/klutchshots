@@ -2,12 +2,7 @@
 
 ## Architecture
 
-The KlutchShots iOS application is built using the **Model-View-ViewModel (MVVM)** architectural pattern. This structure promotes separation of concerns, making the codebase more maintainable, testable, and scalable.
-
-*   **Model:** Represents the data and business logic. In KlutchShots, this includes data models for videos, user profiles, and any other relevant data.
-*   **View:** The user interface layer, built with UIKit. Views are responsible for displaying data and capturing user interactions.
-*   **ViewModel:** Acts as an intermediary between the Model and the View. It prepares data for display, handles user input, and updates the Model. ViewModels contain presentation logic and are responsible for managing the state of the View.
-
+The KlutchShots app adopts a Model-View-ViewModel (MVVM) architecture to separate concerns and improve testability. The UI is built using SwiftUI. The app's data flow is unidirectional, driven by view models that interact with services to fetch and process data.
 
 #### UI & Data Flow
 
