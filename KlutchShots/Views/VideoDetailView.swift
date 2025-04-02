@@ -23,7 +23,7 @@ class VideoDetailViewModel: ObservableObject {
 
 // MARK: - Preview Extension
 extension VideoDetailViewModel {
-    static func mock() -> VideoDetailViewModel {
+    static func preview() -> VideoDetailViewModel {
         VideoDetailViewModel(video: Videos.mock[0])
     }
 }
@@ -131,6 +131,6 @@ struct VideoDetailView: View {
 
 #Preview {
     NavigationView {
-        VideoDetailView(viewModel: VideoDetailViewModel.mock())
+        VideoDetailView(viewModel: VideoDetailViewModel.preview())
     }
 }

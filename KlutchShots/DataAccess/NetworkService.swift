@@ -2,6 +2,15 @@ import Combine
 import UIKit
 
 
+// MARK: - NetworkSession
+
+struct NetworkSession {
+    var dispatch: (URL) async throws -> (Data, URLResponse)
+    static var live = NetworkSession { url in
+        try await URLSession.shared.data(from: url)
+    }
+}
+
 /// A network service actor that handles API requests and image caching
 class NetworkService {
 
@@ -21,33 +30,7 @@ class NetworkService {
         self.imageCache = imageCache
     }
 
-    func fetchImage(
-        from url: URL,
-        checkCache: Bool = true
-    ) async throws -> UIImage? {
-        // Check cache first if enabled
-        if checkCache, let cachedImage = await imageCache.fetch(for: url) {
-            return cachedImage
-        }
-
-        do {
-            let (data, response) = try await session.dispatch(url)
-            try validateHTTPResponse(response)
-            guard let image = UIImage(data: data) else {
-                return nil
-            }
-
-            // Cache the downloaded image
-            await imageCache.save(image, for: url)
-            return image
-        } catch {
-            print("Error fetching image from network: \(error.localizedDescription)")
-            throw error
-        }
-    }
-
-    // MARK: - Private Methods
-    private func validateHTTPResponse(_ response: URLResponse) throws {
+    func validateHTTPResponse(_ response: URLResponse) throws {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse) // Not an HTTP response
         }
@@ -74,14 +57,6 @@ class NetworkService {
     }
 }
 
-// MARK: - NetworkSession
-
-struct NetworkSession {
-    var dispatch: (URL) async throws -> (Data, URLResponse)
-    static var live = NetworkSession { url in
-        try await URLSession.shared.data(from: url)
-    }
-}
 
 // MARK: - VideoFetching
 
@@ -103,6 +78,35 @@ extension NetworkService: VideoFetching {
             return try Videos(jsonData: data)
         } catch {
             print("Network error: \(error)")
+            throw error
+        }
+    }
+}
+
+protocol ImageFetching {
+    func fetchImage(from url: URL, checkCache: Bool) async throws -> UIImage?
+}
+
+extension NetworkService: ImageFetching {
+
+    func fetchImage(from url: URL, checkCache: Bool = true) async throws -> UIImage? {
+        // Check cache first if enabled
+        if checkCache, let cachedImage = await imageCache.fetch(for: url) {
+            return cachedImage
+        }
+
+        do {
+            let (data, response) = try await session.dispatch(url)
+            try validateHTTPResponse(response)
+            guard let image = UIImage(data: data) else {
+                return nil
+            }
+
+            // Cache the downloaded image
+            await imageCache.save(image, for: url)
+            return image
+        } catch {
+            print("Error fetching image from network: \(error.localizedDescription)")
             throw error
         }
     }

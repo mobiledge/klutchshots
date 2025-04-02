@@ -19,7 +19,7 @@ final class DownloadViewModel {
     // MARK: - Properties
 
     private let video: Video
-    private let downloadService = DownloadService()
+    private let downloadService = VideoDownloader()
     private var cancellables = Set<AnyCancellable>()
 
     var downloadState: DownloadState = .idle

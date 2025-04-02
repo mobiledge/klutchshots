@@ -1,13 +1,11 @@
 import Foundation
 import Combine
 
-/// A service that handles file downloads with progress tracking using Combine.
-///
-/// This implementation uses Apple's Combine framework to provide reactive download progress
-/// and completion handling.
-final class DownloadService {
+/// Handles file downloads using Combine.
+/// Provide reactive download progress and completion handling.
+final class VideoDownloader {
 
-    /// Represents the possible results of a download operation using Combine publishers.
+    /// Represents the possible results of a download operation
     enum DownloadResult {
         case fractionCompleted(Double)
         case completed(URL)

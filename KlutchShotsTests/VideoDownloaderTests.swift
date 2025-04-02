@@ -2,13 +2,13 @@ import XCTest
 import Combine
 @testable import KlutchShots
 
-final class DownloadServiceTests: XCTestCase {
-    var downloadService: DownloadService!
+final class VideoDownloaderTests: XCTestCase {
+    var downloadService: VideoDownloader!
     var cancellables: Set<AnyCancellable> = []
 
     override func setUp() {
         super.setUp()
-        downloadService = DownloadService()
+        downloadService = VideoDownloader()
     }
 
     override func tearDown() {
