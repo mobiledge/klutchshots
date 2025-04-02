@@ -1,19 +1,12 @@
 import Combine
 import UIKit
 
-/// Protocol abstracting URLSession's data task method for better testability
-protocol URLSessionProtocol {
-    func data(from url: URL, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse)
-}
-
-// MARK: - URLSession Conformance
-extension URLSession: URLSessionProtocol {}
 
 /// A network service actor that handles API requests and image caching
-actor NetworkService {
+class NetworkService {
 
     // MARK: - Shared Instance
-    static let shared = NetworkService(imageCache: ImageCache())
+    static let shared = NetworkService()
 
     // MARK: - Properties
     let session: NetworkSession
@@ -26,24 +19,6 @@ actor NetworkService {
     ) {
         self.session = session
         self.imageCache = imageCache
-    }
-
-    // MARK: - Public Methods
-    func fetchVideos() async throws -> [Video] {
-        let urlString = "https://gist.githubusercontent.com/poudyalanil/ca84582cbeb4fc123a13290a586da925/raw/14a27bd0bcd0cd323b35ad79cf3b493dddf6216b/videos.json"
-
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
-        }
-
-        do {
-            let (data, response) = try await session.dispatch(url)
-            try validateHTTPResponse(response)
-            return try Videos(jsonData: data)
-        } catch {
-            print("Network error: \(error)")
-            throw error
-        }
     }
 
     func fetchImage(
@@ -99,9 +74,36 @@ actor NetworkService {
     }
 }
 
+// MARK: - NetworkSession
+
 struct NetworkSession {
     var dispatch: (URL) async throws -> (Data, URLResponse)
     static var live = NetworkSession { url in
         try await URLSession.shared.data(from: url)
+    }
+}
+
+// MARK: - VideoFetching
+
+protocol VideoFetching {
+    func fetchVideos() async throws -> [Video]
+}
+
+extension NetworkService: VideoFetching {
+    func fetchVideos() async throws -> [Video] {
+        let urlString = "https://gist.githubusercontent.com/poudyalanil/ca84582cbeb4fc123a13290a586da925/raw/14a27bd0bcd0cd323b35ad79cf3b493dddf6216b/videos.json"
+
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        do {
+            let (data, response) = try await session.dispatch(url)
+            try validateHTTPResponse(response)
+            return try Videos(jsonData: data)
+        } catch {
+            print("Network error: \(error)")
+            throw error
+        }
     }
 }

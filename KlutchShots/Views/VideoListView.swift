@@ -34,11 +34,9 @@ class VideoListViewModel {
     // MARK: - Properties
 
     var loadingState: LoadingState<[Video]> = .loading
-    private let networkService: NetworkService
+    private let networkService: VideoFetching
 
-    // MARK: - Initialization
-
-    init(networkService: NetworkService = .shared) {
+    init(networkService: VideoFetching = NetworkService.shared) {
         self.networkService = networkService
     }
 
