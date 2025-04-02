@@ -4,7 +4,7 @@
 
 The KlutchShots app adopts a Model-View-ViewModel (MVVM) architecture to separate concerns and improve testability. The UI is built using SwiftUI. The app's data flow is unidirectional, driven by view models that interact with services to fetch and process data.
 
-#### UI & Data Flow
+### UI & Data Flow
 
 1.  `ContentView` starts with `VideoListView`.
 2.  `VideoListView` uses `VideoListViewModel` to fetch video data.
@@ -16,13 +16,13 @@ The KlutchShots app adopts a Model-View-ViewModel (MVVM) architecture to separat
 8.  `DownloadView` (within `VideoDetailView`) with `DownloadViewModel` handles video downloads.
 
 
-#### Video Playback
+### Video Playback
 
 `VideoPlayerViewModel` manages the `AVPlayer` and monitors its state. It updates the `playerState` property to reflect changes in the player's status (e.g., loading, ready to play, or error). 
 
 `VideoPlayerView` observes the `playerState` and updates the UI accordingly, showing the video, a loading indicator, or an error message. Combine is used for asynchronous event handling between the player and the view model.
 
-#### Download Handling
+### Download Handling
 
 `ImageCache` is designed to cache images downloaded from URLs. It stores images in the app's cache directory, minimizing network requests and improving performance. An in-memory cache (e.g., `NSCache`) could be implemented to further enhance performance.
 
@@ -53,7 +53,7 @@ VideoDownloader()
 })
 ```
 
-#### Tests
+### Tests
 
 The following tests have been implemented particularly focusing on the data access layer:
 
