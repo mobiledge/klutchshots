@@ -64,6 +64,18 @@ The following tests have been implemented particularly focusing on the data acce
 
 Note that tests for other View Models (like `VideoDetailViewModel`, `VideoPlayerViewModel`, and `DownloadViewModel`) are not currently implemented, but could be added following a similar approach to `VideoListViewModelTests`.
 
+
+
+## Improvements
+
+The following features and improvements would be great but I couldn't get to:
+
+- In-memory cache: Currently images are saved to the caches folder with no triggers to clear cache based on size or expiration.
+- Video download management: Videos are currently downloaded to temp folder but should be moved to downloads once complete. The UI needs updating to reflect if a video is already downloaded, and subsequent plays should use the local file.
+- Custom SwiftUI transitions between video list and detail views using namespace (attempted but removed due to implementation issues).
+- Additional unit tests for other view models (VideoDetailViewModel, VideoPlayerViewModel, and DownloadViewModel).
+- General app improvements including localization, accessibility features, and dark mode support.
+
 ## Build and Run Instructions
 
 1.  **Clone the Repository:**
