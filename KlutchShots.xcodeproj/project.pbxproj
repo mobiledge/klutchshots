@@ -40,10 +40,10 @@
 				DataAccess/VideoRepository.swift,
 				Fixtures/videos.json,
 				Models/Video.swift,
+				Views/DownloadsView.swift,
 				Views/DownloadView.swift,
 				Views/ThumbnailImage.swift,
 				Views/VideoDetailView.swift,
-				Views/VideoDownloadViewModel.swift,
 				Views/VideoListView.swift,
 				Views/VideoPlayerView.swift,
 			);

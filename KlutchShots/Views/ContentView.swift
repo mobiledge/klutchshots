@@ -15,12 +15,28 @@ struct ContentView: View {
     )
 
     var body: some View {
-        NavigationStack {
-            VideoListView(
-                viewModel: VideoListViewModel(
-                    networkService: networkService
+        TabView {
+
+            // Videos Tab
+            NavigationStack {
+                VideoListView(
+                    viewModel: VideoListViewModel(
+                        networkService: networkService
+                    )
                 )
-            )
+            }
+            .tabItem {
+                Label("Videos", systemImage: "play.rectangle")
+            }
+
+            // Downloads Tab
+            NavigationStack {
+                DownloadsView()
+                    .navigationTitle("Downloads")
+            }
+            .tabItem {
+                Label("Downloads", systemImage: "arrow.down.circle")
+            }
         }
     }
 }

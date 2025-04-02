@@ -51,8 +51,6 @@ struct VideoDetailView: View {
                         .font(.body)
                         .padding(.vertical, 10)
 
-//                    VideoDownloadView(videoUrl: video.videoUrl, isLive: false)
-
                     Divider()
 
                     HStack {
