@@ -199,63 +199,6 @@ struct VideoRow: View {
     }
 }
 
-
-//struct VideoRow: View {
-//    let video: Video
-//
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 8) {
-//            ZStack(alignment: .bottomTrailing) {
-//                AsyncImage(url: URL(string: video.thumbnailUrl)) { phase in
-//                    switch phase {
-//                    case .empty:
-//                        ProgressView()
-//                            .frame(maxWidth: .infinity, minHeight: 200)
-//                    case .success(let image):
-//                        image
-//                            .resizable()
-//                            .aspectRatio(16/9, contentMode: .fit)
-//                    case .failure:
-//                        Image(systemName: "photo")
-//                            .resizable()
-//                            .aspectRatio(16/9, contentMode: .fit)
-//                            .foregroundColor(.gray)
-//                    @unknown default:
-//                        EmptyView()
-//                    }
-//                }
-//
-//                if video.isLive {
-//                    LiveBadge()
-//                        .padding(8)
-//                } else {
-//                    DurationBadge(duration: video.duration)
-//                        .padding(8)
-//                }
-//            }
-//
-//            // Video info
-//            VStack(alignment: .leading, spacing: 4) {
-//                Text(video.title)
-//                    .font(.headline)
-//                    .lineLimit(2)
-//
-//                HStack(spacing: 4) {
-//                    Text(video.author)
-//                        .font(.subheadline)
-//                        .foregroundColor(.secondary)
-//
-//                    Text("· \(video.views) views")
-//                        .font(.caption)
-//                        .foregroundColor(.secondary)
-//                }
-//            }
-//            .padding(.horizontal, 16)
-//        }
-//        .padding(.bottom, 16)
-//    }
-//}
-
 struct DurationBadge: View {
     let duration: String
 

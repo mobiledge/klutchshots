@@ -113,7 +113,7 @@ struct DownloadView: View {
                 Text("Download complete")
                 Text("File saved at:")
                     .font(.caption)
-                Text(fileURL.lastPathComponent)
+                Text(fileURL.absoluteString)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
