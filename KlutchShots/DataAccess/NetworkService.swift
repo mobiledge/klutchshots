@@ -66,12 +66,7 @@ protocol VideoFetching {
 
 extension NetworkService: VideoFetching {
     func fetchVideos() async throws -> [Video] {
-        let urlString = "https://gist.githubusercontent.com/poudyalanil/ca84582cbeb4fc123a13290a586da925/raw/14a27bd0bcd0cd323b35ad79cf3b493dddf6216b/videos.json"
-
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
-        }
-
+        let url = Constants.baseURL.appending(path: "videos.json")
         do {
             let (data, response) = try await session.dispatch(url)
             try validateHTTPResponse(response)

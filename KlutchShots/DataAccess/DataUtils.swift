@@ -66,3 +66,20 @@ extension BundleLoadable where Self: JSONConvertible {
         try self.init(jsonData: data)
     }
 }
+
+/// This initializer is designed to be used with string literals that are known at compile-time
+/// to be valid URLs. It will trigger a precondition failure if the string cannot be converted
+/// to a valid URL, making it safer to use for hard-coded URLs that should never fail.
+///
+/// - Example:
+///   ```
+///   let url = URL(staticString: "https://example.com/api")
+///   ```
+extension URL {
+    init(staticString string: StaticString) {
+        guard let url = URL(string: "\(string)") else {
+            preconditionFailure("Invalid static URL string: \(string)")
+        }
+        self = url
+    }
+}
