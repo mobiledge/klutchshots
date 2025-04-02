@@ -6,14 +6,12 @@ The KlutchShots app adopts a Model-View-ViewModel (MVVM) architecture to separat
 
 ### UI & Data Flow
 
-1.  `ContentView` starts with `VideoListView`.
-2.  `VideoListView` uses `VideoListViewModel` to fetch video data.
-3.  `VideoListViewModel` fetches data using `NetworkService` and updates `loadingState`.
-4.  `VideoListView` updates UI based on `loadingState`.
-5.  Selecting a video navigates to `VideoDetailView`.
-6.  `VideoDetailView` displays info via `VideoDetailViewModel` and plays video with `VideoPlayerView`.
-7.  `VideoPlayerView` uses `VideoPlayerViewModel` and `AVPlayer` to play.
-8.  `DownloadView` (within `VideoDetailView`) with `DownloadViewModel` handles video downloads.
+1. `ContentView` starts with `VideoListView`.
+2. `VideoListView` uses `VideoListViewModel` to fetch video data (using `NetworkService`) and updates UI based on `loadingState`.
+3. Selecting a video navigates to `VideoDetailView`.
+6. `VideoDetailView` displays info via `VideoDetailViewModel` and plays video with `VideoPlayerView`.
+7. `VideoPlayerView` uses `VideoPlayerViewModel` and `AVPlayer` to play.
+8. `DownloadView` (within `VideoDetailView`) with `DownloadViewModel` handles video downloads.
 
 
 ### Video Playback
