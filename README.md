@@ -1,5 +1,7 @@
 # KlutchShots
 
+https://github.com/user-attachments/assets/a79d562f-73d0-4f27-a702-6f613584419e
+
 ## Architecture
 
 The KlutchShots app adopts a Model-View-ViewModel (MVVM) architecture to separate concerns and improve testability. The UI is built using SwiftUI. The app's data flow is unidirectional, driven by view models that interact with services to fetch and process data.
