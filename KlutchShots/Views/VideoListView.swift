@@ -170,7 +170,7 @@ struct VideoRow: View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .bottomTrailing) {
                 ThumbnailImage(
-                    viewModel: AsyncCachedImageViewModel(
+                    viewModel: ThumbnailImageViewModel(
                         url: video.thumbnailUrl
                     )
                 )
