@@ -1,15 +1,30 @@
 import SwiftUI
 import Observation
 
+enum LoadingState<T> {
+    case loading
+    case loaded(T)
+    case error(Error)
+}
+
+extension LoadingState: Equatable where T: Equatable {
+    static func == (lhs: LoadingState<T>, rhs: LoadingState<T>) -> Bool {
+        switch (lhs, rhs) {
+        case (.loading, .loading):
+            return true
+        case let (.loaded(lhsValue), .loaded(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.error(lhsError), .error(rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        default:
+            return false
+        }
+    }
+}
+
 @MainActor
 @Observable
 class VideoListViewModel {
-
-    enum LoadingState<T> {
-        case loading
-        case loaded(T)
-        case error(Error)
-    }
 
     var loadingState: LoadingState<[Video]> = .loading
     private let networkService: NetworkService
@@ -19,9 +34,6 @@ class VideoListViewModel {
     }
 
     func fetchVideos() async {
-
-//        try? await Task.sleep(for: Duration.seconds(5))
-
         do {
             loadingState = .loading
             let videos = try await networkService.fetchVideos()
@@ -30,13 +42,48 @@ class VideoListViewModel {
             loadingState = .error(error)
         }
     }
+
+    /**
+     Mock subclasses used for SwiftUI previews and testing.
+     These subclasses override `fetchVideos()` to provide predefined states
+     without making actual network requests. This allows the UI to be previewed
+     in different loading conditions:
+     - `LoadingPreview`: Simulates a loading state.
+     - `LoadedPreview`: Simulates a successful fetch with mock video data.
+     - `ErrorPreview`: Simulates an error state with a predefined error message.
+     */
+
+    final class LoadingPreview: VideoListViewModel {
+        override func fetchVideos() async {
+            loadingState = .loading
+        }
+    }
+
+    final class LoadedPreview: VideoListViewModel {
+        override func fetchVideos() async {
+            loadingState = .loaded(Videos.mock)
+        }
+    }
+
+    final class ErrorPreview: VideoListViewModel {
+        override func fetchVideos() async {
+            loadingState = .error(
+                NSError(
+                    domain: "com.example.error",
+                    code: 9999,
+                    userInfo: [NSLocalizedDescriptionKey: "Something went wrong."]
+                )
+            )
+        }
+    }
 }
+
 
 struct VideoListView: View {
 
     @State private var viewModel: VideoListViewModel
 
-    internal init(viewModel: VideoListViewModel) {
+    init(viewModel: VideoListViewModel) {
         _viewModel = State(initialValue: viewModel)
     }
 
@@ -61,7 +108,7 @@ struct VideoListView: View {
         .task {
             await viewModel.fetchVideos()
         }
-        .navigationTitle("Videos")
+        .navigationTitle("KlutchShots")
     }
 }
 
@@ -111,24 +158,12 @@ struct VideoRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .bottomTrailing) {
-                AsyncImage(url: URL(string: video.thumbnailUrl)) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                            .frame(maxWidth: .infinity, minHeight: 200)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fit)
-                    case .failure:
-                        Image(systemName: "photo")
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fit)
-                            .foregroundColor(.gray)
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
+
+                AsyncCachedImage(
+                    viewModel: AsyncCachedImageViewModel(
+                        url: video.thumbnailUrl
+                    )
+                )
 
                 if video.isLive {
                     LiveBadge()
@@ -161,6 +196,63 @@ struct VideoRow: View {
     }
 }
 
+
+//struct VideoRow: View {
+//    let video: Video
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 8) {
+//            ZStack(alignment: .bottomTrailing) {
+//                AsyncImage(url: URL(string: video.thumbnailUrl)) { phase in
+//                    switch phase {
+//                    case .empty:
+//                        ProgressView()
+//                            .frame(maxWidth: .infinity, minHeight: 200)
+//                    case .success(let image):
+//                        image
+//                            .resizable()
+//                            .aspectRatio(16/9, contentMode: .fit)
+//                    case .failure:
+//                        Image(systemName: "photo")
+//                            .resizable()
+//                            .aspectRatio(16/9, contentMode: .fit)
+//                            .foregroundColor(.gray)
+//                    @unknown default:
+//                        EmptyView()
+//                    }
+//                }
+//
+//                if video.isLive {
+//                    LiveBadge()
+//                        .padding(8)
+//                } else {
+//                    DurationBadge(duration: video.duration)
+//                        .padding(8)
+//                }
+//            }
+//
+//            // Video info
+//            VStack(alignment: .leading, spacing: 4) {
+//                Text(video.title)
+//                    .font(.headline)
+//                    .lineLimit(2)
+//
+//                HStack(spacing: 4) {
+//                    Text(video.author)
+//                        .font(.subheadline)
+//                        .foregroundColor(.secondary)
+//
+//                    Text("· \(video.views) views")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                }
+//            }
+//            .padding(.horizontal, 16)
+//        }
+//        .padding(.bottom, 16)
+//    }
+//}
+
 struct DurationBadge: View {
     let duration: String
 
@@ -188,48 +280,21 @@ struct LiveBadge: View {
 }
 
 // MARK: - Loaded Preview
-class LoadedVideoListViewModel: VideoListViewModel {
-    override func fetchVideos() async {
-        loadingState = .loaded(Videos.mock)
-    }
-}
-
 #Preview("Loaded State") {
     NavigationStack {
-        VideoListView(viewModel: LoadedVideoListViewModel())
-    }
-}
-
-// MARK: - Loading Preview
-class LoadingVideoListViewModel: VideoListViewModel {
-    override func fetchVideos() async {
-        loadingState = .loading
+        VideoListView(viewModel: VideoListViewModel.LoadedPreview())
     }
 }
 
 #Preview("Loading state") {
     NavigationStack {
-        VideoListView(viewModel: LoadingVideoListViewModel())
-    }
-}
-
-
-// MARK: - Error Preview
-class ErrorVideoListViewModel: VideoListViewModel {
-    override func fetchVideos() async {
-        loadingState = .error(
-            NSError(
-                domain: "com.example.error",
-                code: 9999,
-                userInfo: [NSLocalizedDescriptionKey: "Something went wrong."]
-            )
-        )
+        VideoListView(viewModel: VideoListViewModel.LoadingPreview())
     }
 }
 
 #Preview("Error State") {
     NavigationStack {
-        VideoListView(viewModel: ErrorVideoListViewModel())
+        VideoListView(viewModel: VideoListViewModel.ErrorPreview())
     }
 }
 

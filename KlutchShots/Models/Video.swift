@@ -10,7 +10,7 @@ import Foundation
 struct Video: Codable, Identifiable, Hashable {
     let id: String
     let title: String
-    let thumbnailUrl: String
+    let thumbnailUrl: URL
     let duration: String
     let uploadTime: String
     let views: String
