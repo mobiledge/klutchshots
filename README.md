@@ -8,9 +8,24 @@ The KlutchShots iOS application is built using the **Model-View-ViewModel (MVVM)
 *   **View:** The user interface layer, built with UIKit. Views are responsible for displaying data and capturing user interactions.
 *   **ViewModel:** Acts as an intermediary between the Model and the View. It prepares data for display, handles user input, and updates the Model. ViewModels contain presentation logic and are responsible for managing the state of the View.
 
-#### Buffering
 
-`AVPlayer` automatically handles buffering of video content. You can monitor the `AVPlayer`'s `status` property to determine buffering state. Implement logic to display loading indicators while buffering. Key properties for monitoring buffering include `timeControlStatus` and `reasonForWaitingToPlay`.
+#### UI & Data Flow
+
+1.  `ContentView` starts with `VideoListView`.
+2.  `VideoListView` uses `VideoListViewModel` to fetch video data.
+3.  `VideoListViewModel` fetches data using `NetworkService` and updates `loadingState`.
+4.  `VideoListView` updates UI based on `loadingState`.
+5.  Selecting a video navigates to `VideoDetailView`.
+6.  `VideoDetailView` displays info via `VideoDetailViewModel` and plays video with `VideoPlayerView`.
+7.  `VideoPlayerView` uses `VideoPlayerViewModel` and `AVPlayer` to play.
+8.  `DownloadView` (within `VideoDetailView`) with `DownloadViewModel` handles video downloads.
+
+
+#### Video Playback
+
+`VideoPlayerViewModel` manages the `AVPlayer` and monitors its state. It updates the `playerState` property to reflect changes in the player's status (e.g., loading, ready to play, or error). 
+
+`VideoPlayerView` observes the `playerState` and updates the UI accordingly, showing the video, a loading indicator, or an error message. Combine is used for asynchronous event handling between the player and the view model.
 
 #### Download Handling
 
