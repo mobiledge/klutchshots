@@ -34,10 +34,6 @@
 			membershipExceptions = (
 				DataAccess/DownloadService.swift,
 				DataAccess/ImageCache.swift,
-				DataAccess/ImageFetcherLegacy.swift,
-				DataAccess/RequestDispatcher.swift,
-				DataAccess/VideoAPI.swift,
-				DataAccess/VideoRepository.swift,
 				Fixtures/videos.json,
 				Models/Video.swift,
 				Views/DownloadView.swift,

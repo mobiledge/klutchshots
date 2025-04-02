@@ -1,10 +1,3 @@
-//
-//  NetworkService.swift
-//  NetworkService
-//
-//  Created by Rabin Joshi on 2025-04-01.
-//
-
 import Combine
 import UIKit
 
