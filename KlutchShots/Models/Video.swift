@@ -40,7 +40,7 @@ extension Videos {
         }
     }
 
-    static func bundleContents(_ resource: String) -> Data {
+    private static func bundleContents(_ resource: String) -> Data {
         guard let url = Bundle.main.url(forResource: resource, withExtension: nil) else {
             print("ERROR: Could not find resource '\(resource)' in bundle")
             return Data()
