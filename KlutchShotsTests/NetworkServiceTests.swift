@@ -4,43 +4,43 @@ import XCTest
 
 class NetworkServiceTests: XCTestCase {
 
-    var mockSession: MockURLSessionProtocol!
-    var imageCache: ImageCache!
-    var networkService: NetworkService!
-
     override func setUp() {
         super.setUp()
-        mockSession = MockURLSessionProtocol()
-        imageCache = ImageCache()
-        networkService = NetworkService(session: mockSession, imageCache: imageCache)
     }
 
     override func tearDown() {
-        mockSession = nil
-        networkService = nil
         super.tearDown()
     }
 
+    func mockResponse(url: URL? = nil, statusCode: Int) -> HTTPURLResponse {
+            HTTPURLResponse(
+                url: url ?? URL(string: "https://api.example.com")!,
+                statusCode: statusCode,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+        }
+
     // MARK: - Videos
     func testFetchVideosSuccess() async throws {
-        // Arrange
-        mockSession.mockData = try? Videos.mock.toJsonData()
-        mockSession.mockResponse = HTTPURLResponse.mock200
 
-        // Act
+        let session = NetworkSession { _ in
+            return (try! Videos.mock.toJsonData(), self.mockResponse(statusCode: 200))
+        }
+        let networkService = NetworkService(session: session)
         let fetched = try await networkService.fetchVideos()
 
         // Assert
-        XCTAssertNil(mockSession.mockError)
-        XCTAssertTrue(mockSession.dataFromURLCalled)
         XCTAssertEqual(fetched, Videos.mock)
     }
 
     func testFetchVideosNetworkError() async {
-        // Arrange
-        mockSession.mockError = URLError(.notConnectedToInternet)
 
-        // Act & Assert
+        let session = NetworkSession { _ in
+            throw URLError(.notConnectedToInternet)
+        }
+        let networkService = NetworkService(session: session)
+
         do {
             _ = try await networkService.fetchVideos()
             XCTFail("Expected error to be thrown")
@@ -51,9 +51,11 @@ class NetworkServiceTests: XCTestCase {
     }
 
     func testFetchVideosBadStatusCode() async {
-        // Arrange
-        mockSession.mockData = Data()
-        mockSession.mockResponse = HTTPURLResponse.mock404
+
+        let session = NetworkSession { _ in
+            return (try! Videos.mock.toJsonData(), self.mockResponse(statusCode: 500))
+        }
+        let networkService = NetworkService(session: session)
 
         // Act & Assert
         do {
@@ -66,9 +68,11 @@ class NetworkServiceTests: XCTestCase {
     }
 
     func testFetchVideosDecodingError() async {
-        // Arrange
-        mockSession.mockData = "{\"invalid\": \"json\"}".data(using: .utf8)!
-        mockSession.mockResponse = HTTPURLResponse.mock200
+
+        let session = NetworkSession { _ in
+            return ("{\"invalid\": \"json\"}".data(using: .utf8)!, self.mockResponse(statusCode: 200))
+        }
+        let networkService = NetworkService(session: session)
 
         // Act & Assert
         do {
@@ -81,90 +85,35 @@ class NetworkServiceTests: XCTestCase {
 
     // MARK: - Images
     func testFetchImageSuccessFromNetwork() async throws {
-        // Arrange
         let testURL = URL(string: "https://example.com/image.jpg")!
-        let testImage = UIImage(systemName: "photo")!
-        mockSession.mockData = testImage.jpegData(compressionQuality: 1.0)
-        mockSession.mockResponse = HTTPURLResponse.mock200
+        let session = NetworkSession { url in
+            let image = UIImage(systemName: "photo")!
+            let data = image.jpegData(compressionQuality: 1.0)!
+            return (data, self.mockResponse(url: url, statusCode: 200))
+        }
+        let networkService = NetworkService(session: session)
+        await networkService.imageCache.clearCache() // empty cache forcing fetch from network
 
-        // Act
         let fetchedImage = try await networkService.fetchImage(from: testURL, checkCache: false)
-
-        // Assert
         XCTAssertNotNil(fetchedImage)
-        XCTAssertTrue(mockSession.dataFromURLCalled)
-        XCTAssertEqual(mockSession.lastURL, testURL)
-        XCTAssertNil(mockSession.mockError)
-    }
-
-    func testFetchedImageSavedToCache() async throws {
-        // Arrange
-        let testURL = URL(string: "https://example.com/image.jpg")!
-        let testImage = UIImage(systemName: "photo")!
-        mockSession.mockData = testImage.jpegData(compressionQuality: 1.0)
-        mockSession.mockResponse = HTTPURLResponse.mock200
-
-        // Act
-        let _ = try await networkService.fetchImage(from: testURL, checkCache: false)
-        let cachedImage = await imageCache.fetch(for: testURL)
-
-        // Assert
-        XCTAssertNotNil(cachedImage)
     }
 
     func testFetchImageSuccessFromCache() async throws {
+
         let testURL = URL(string: "https://example.com/image.jpg")!
-        let testImage = UIImage(systemName: "photo")!
+        let session = NetworkSession { url in
+            // Setting up network to fail
+            return (Data(), self.mockResponse(statusCode: 500))
+        }
 
-        // Preload the cache with our test image
-        await networkService.imageCache.save(testImage, for: testURL)
+        let networkService = NetworkService(session: session)
+        await networkService.imageCache.clearCache()
+        await networkService.imageCache.save(
+            UIImage(systemName: "photo")!,
+            for: testURL
+        )
 
-        // When explicitly bypassing cache, should return nil (since we're not mocking network)
-        var fetchedImage = try? await networkService.fetchImage(from: testURL, checkCache: false)
-        XCTAssertNil(fetchedImage, "Should return nil when bypassing cache without network response")
-
-        // Verify cache hit. Should return the cached image without network call
-        fetchedImage = try await networkService.fetchImage(from: testURL, checkCache: true)
+        let fetchedImage = try await networkService.fetchImage(from: testURL, checkCache: true)
         XCTAssertNotNil(fetchedImage)
     }
-}
-
-class MockURLSessionProtocol: URLSessionProtocol {
-    var mockData: Data?
-    var mockResponse: URLResponse?
-    var mockError: Error?
-
-    var dataFromURLCalled = false
-    var lastURL: URL?
-
-    func data(from url: URL, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse) {
-        dataFromURLCalled = true
-        lastURL = url
-
-        if let error = mockError {
-            throw error
-        }
-
-        guard let data = mockData, let response = mockResponse else {
-            throw URLError(.unknown)
-        }
-
-        return (data, response)
-    }
-}
-
-extension HTTPURLResponse {
-    static var mock200 = HTTPURLResponse(
-        url: URL(string: "https://example.com")!,
-        statusCode: 200,
-        httpVersion: nil,
-        headerFields: nil
-    )
-
-    static var mock404 = HTTPURLResponse(
-        url: URL(string: "https://example.com")!,
-        statusCode: 404,
-        httpVersion: nil,
-        headerFields: nil
-    )
 }

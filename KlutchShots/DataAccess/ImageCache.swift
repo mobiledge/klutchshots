@@ -8,6 +8,7 @@ import UIKit
 /// In the future, an in-memory cache (e.g., `NSCache`) could be added
 /// to further optimize performance and reduce disk access.
 actor ImageCache {
+    static let shared = ImageCache()
     private let fileManager: FileManager
     private let cacheDirectory: URL
 
@@ -54,6 +55,22 @@ actor ImageCache {
             print("Saved to \(fileURL.absoluteString)")
         } catch {
             print("Error saving image to cache: \(error.localizedDescription)")
+        }
+    }
+
+    func clearCache() async {
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(
+                at: cacheDirectory,
+                includingPropertiesForKeys: nil,
+                options: .skipsHiddenFiles
+            )
+            for fileURL in fileURLs {
+                try fileManager.removeItem(at: fileURL)
+            }
+            print("Cache cleared successfully")
+        } catch {
+            print("Error clearing cache: \(error.localizedDescription)")
         }
     }
 

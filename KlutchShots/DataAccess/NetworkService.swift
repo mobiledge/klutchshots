@@ -16,13 +16,13 @@ actor NetworkService {
     static let shared = NetworkService(imageCache: ImageCache())
 
     // MARK: - Properties
-    private let session: URLSessionProtocol
+    let session: NetworkSession
     let imageCache: ImageCache
 
     // MARK: - Initialization
     init(
-        session: URLSessionProtocol = URLSession.shared,
-        imageCache: ImageCache
+        session: NetworkSession = .live,
+        imageCache: ImageCache = .shared
     ) {
         self.session = session
         self.imageCache = imageCache
@@ -37,13 +37,8 @@ actor NetworkService {
         }
 
         do {
-            let (data, response) = try await session.data(from: url, delegate: nil)
-
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                throw URLError(.badServerResponse)
-            }
-
+            let (data, response) = try await session.dispatch(url)
+            try validateHTTPResponse(response)
             return try Videos(jsonData: data)
         } catch {
             print("Network error: \(error)")
@@ -61,13 +56,8 @@ actor NetworkService {
         }
 
         do {
-            let (data, response) = try await session.data(from: url, delegate: nil)
-
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                throw URLError(.badServerResponse)
-            }
-
+            let (data, response) = try await session.dispatch(url)
+            try validateHTTPResponse(response)
             guard let image = UIImage(data: data) else {
                 return nil
             }
@@ -79,5 +69,39 @@ actor NetworkService {
             print("Error fetching image from network: \(error.localizedDescription)")
             throw error
         }
+    }
+
+    // MARK: - Private Methods
+    private func validateHTTPResponse(_ response: URLResponse) throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse) // Not an HTTP response
+        }
+        switch httpResponse.statusCode {
+        case 200...299:
+            return // Success - no error
+        case 400:
+            throw URLError(.badURL) // Bad Request
+        case 401:
+            throw URLError(.userAuthenticationRequired) // Unauthorized
+        case 403:
+            throw URLError(.noPermissionsToReadFile) // Forbidden
+        case 404:
+            throw URLError(.fileDoesNotExist) // Not Found
+        case 408:
+            throw URLError(.timedOut) // Request Timeout
+        case 429:
+            throw URLError(.dataNotAllowed) // Too Many Requests (rate limiting)
+        case 500...599:
+            throw URLError(.badServerResponse) // Server Error
+        default:
+            throw URLError(.unknown) // Unhandled status code
+        }
+    }
+}
+
+struct NetworkSession {
+    var dispatch: (URL) async throws -> (Data, URLResponse)
+    static var live = NetworkSession { url in
+        try await URLSession.shared.data(from: url)
     }
 }
