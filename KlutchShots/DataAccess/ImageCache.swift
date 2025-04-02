@@ -60,7 +60,7 @@ actor ImageCache {
     /// Generates a sanitized filename from a URL to ensure valid file storage.
     /// Replaces non-alphanumeric characters with underscores, which may cause filename collisions.
     /// A better approach could be to use a hashing function (e.g., SHA256) for uniqueness.
-    private func sanitizedFileName(for url: URL) -> String {
+    func sanitizedFileName(for url: URL) -> String {
         let sanitized = url.absoluteString
             .replacingOccurrences(of: "[^a-zA-Z0-9]", with: "_", options: .regularExpression)
         return String(sanitized.prefix(255))
