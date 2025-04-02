@@ -49,8 +49,18 @@ struct VideoDetailView: View {
 
                     Text(video.description ?? "-")
                         .font(.body)
+                        .padding(.vertical, 10)
 
-                    VideoDownloadView(videoUrl: video.videoUrl, isLive: false)
+//                    VideoDownloadView(videoUrl: video.videoUrl, isLive: false)
+
+                    Divider()
+
+                    HStack {
+                        Spacer()
+                        DownloadView(viewModel: DownloadViewModel(video: video))
+                            .padding()
+                        Spacer()
+                    }
                 }
                 .padding(.horizontal, 16)
             }
